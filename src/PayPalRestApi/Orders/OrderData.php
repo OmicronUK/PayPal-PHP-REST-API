@@ -8,6 +8,7 @@ class OrderData
     private string $currency;
     private string $description;
     private string $customId;
+    private ?string $softDescriptor = null;
 
     // Constructor to initialize order data
     public function __construct(
@@ -15,11 +16,13 @@ class OrderData
         string $currency,
         string $customId,
         string $description,
+        ?string $softDescriptor = null,
     ) {
         $this->amount = $amount;
         $this->currency = $currency;
         $this->customId = $customId;
         $this->description = $description;
+        $this->softDescriptor = $softDescriptor;
     }
 
     // Getters for order data
@@ -43,20 +46,31 @@ class OrderData
         return $this->customId;
     }
 
+    public function getSoftDescriptor(): ?string
+    {
+        return $this->softDescriptor;
+    }
+
     // Convert order data to the format required by PayPal
     public function toPayPalFormat(): array
     {
+        $purchaseUnit = [
+            "custom_id" => $this->getCustomId(),
+            "amount" => [
+                "value" => $this->getAmount(),
+                "currency_code" => $this->getCurrency(),
+            ],
+            'description' => $this->getDescription(),
+        ];
+
+        if (!empty($this->softDescriptor)) {
+            $purchaseUnit['soft_descriptor'] = $this->softDescriptor;
+        }
+
         return [
             "intent" => "CAPTURE",
             "purchase_units" => [
-                [
-                    "custom_id" => $this->getCustomId(),
-                    "amount" => [
-                        "value" => $this->getAmount(),
-                        "currency_code" => $this->getCurrency(),
-                    ],
-                    'description' => $this->getDescription(),
-                ]
+                $purchaseUnit
             ],
             "application_context" => [
                 'shipping_preference' => 'NO_SHIPPING'

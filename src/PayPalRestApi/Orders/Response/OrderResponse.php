@@ -26,15 +26,15 @@ class OrderResponse
         $this->status = $response['status'] ?? '';
         
         // Extract payer 
-        $this->payerEmail = $response['payer']['email_address'];
-        $this->payerId = $response['payer']['payer_id'];
+        $this->payerEmail = $response['payer']['email_address'] ?? null;
+        $this->payerId = $response['payer']['payer_id'] ?? null;
 
         // Extracting the purchase amount and currency
         $this->purchaseAmount = (float) ($response['purchase_units'][0]['payments']['captures'][0]['amount']['value'] ?? 0);
         $this->currency = $response['purchase_units'][0]['payments']['captures'][0]['amount']['currency_code'] ?? 'XXX';
         
         // Extract custom ID
-        $this->customId = $response['purchase_units'][0]['payments']['captures'][0]['custom_id'];
+        $this->customId = $response['purchase_units'][0]['payments']['captures'][0]['custom_id'] ?? null;
 
         // Extract payment ID
         $this->paymentId = $response['purchase_units'][0]['payments']['captures'][0]['id'] ?? null;
