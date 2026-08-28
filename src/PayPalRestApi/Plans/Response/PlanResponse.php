@@ -13,6 +13,7 @@ class PlanResponse
     private string $id;
     private string $name;
     private string $description;
+    private string $status;
     
     /** @var BillingCycle[] */
     private array $billingCycles;
@@ -23,12 +24,14 @@ class PlanResponse
         string $id,
         string $name,
         string $description,
+        string $status,
         array $billingCycles,
         array $payee
     ) {
         $this->id = $id;
         $this->name = $name;
         $this->description = $description;
+        $this->status = $status;
         $this->billingCycles = $billingCycles;
         $this->payee = $payee;
     }
@@ -46,6 +49,11 @@ class PlanResponse
     public function getDescription(): string
     {
         return $this->description;
+    }
+
+    public function getStatus(): string
+    {
+        return $this->status;
     }
 
     /**
@@ -67,6 +75,7 @@ class PlanResponse
             'id' => $this->id,
             'name' => $this->name,
             'description' => $this->description,
+            'status' => $this->status,
             'billing_cycles' => array_map(fn(BillingCycle $cycle) => $cycle->toArray(), $this->billingCycles),
             'payee' => $this->payee
         ];
@@ -98,6 +107,7 @@ class PlanResponse
             $plan['id'],
             $plan['name'],
             $plan['description'],
+            $plan['status'] ?? '',
             $billingCycles,
             $plan['payee'] ?? []
         );

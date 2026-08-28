@@ -48,16 +48,18 @@ class Plan
         return PlanResponse::fromApiResponse($response);
     }
   
-    public function list(array $params = []): array
+    public function list(?string $status = 'ACTIVE'): array
     {
-        $query = http_build_query($params);
-        $uri = '/v1/billing/plans' . ($query ? "?$query" : '');
+        $uri = '/v1/billing/plans' . ($status !== null ? '?status=' . $status : '');
 
         // detailed output
         $this->client->preferRepresentation();
 
         // Get the raw plans from PayPal API
         $response = $this->client->request('GET', $uri);
+
+        // reset the shared client flag
+        $this->client->preferRepresentation(false);
 
         // Map each plan array into a PlanResponse object
         $plans = array_map(
@@ -66,6 +68,26 @@ class Plan
         );
 
         return $plans;
+    }
+
+    public function patch(string $planId, array $operations): void
+    {
+        $this->client->request('PATCH', "/v1/billing/plans/{$planId}", $operations);
+    }
+
+    public function updatePricing(string $planId, int $sequence, float $amount, string $currency): void
+    {
+        $this->client->request('POST', "/v1/billing/plans/{$planId}/update-pricing-schemes", [
+            'pricing_schemes' => [[
+                'billing_cycle_sequence' => $sequence,
+                'pricing_scheme' => [
+                    'fixed_price' => [
+                        'value' => number_format($amount, 2, '.', ''),
+                        'currency_code' => strtoupper($currency),
+                    ],
+                ],
+            ]],
+        ]);
     }
 
     public function activate(string $planId): array
